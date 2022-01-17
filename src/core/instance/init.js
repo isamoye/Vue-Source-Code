@@ -13,7 +13,7 @@ import {extend, mergeOptions, formatComponentName} from '../util/index'
 let uid = 0
 
 export function initMixin(Vue: Class<Component>) {
-  Vue.prototype._init = function (options ? : Object
+  Vue.prototype._init = function (options ?: Object
 )
   {
     const vm: Component = this
@@ -64,8 +64,8 @@ export function initMixin(Vue: Class<Component>) {
     // 初始化实例的关系属性，比如：$parent、$root、$children、$refs
     // 以及一些新增的配置项参数，比如：_watcher、_inactive、_isMounted、_isDestroyed等
     initLifecycle(vm)
-    
-    // 
+
+    //
     initEvents(vm)
     // 解析、初始化$slot，为实例挂载处理渲染函数，得到 vm.$createElement 方法，即 h 函数
     initRender(vm)
@@ -88,6 +88,7 @@ export function initMixin(Vue: Class<Component>) {
     }
 
     if (vm.$options.el) {
+      // 渲染dom节点，方法在：【src/platform/web/entry-runtime-with-compiler.js】
       vm.$mount(vm.$options.el)
     }
   }

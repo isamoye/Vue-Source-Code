@@ -14,7 +14,13 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
+// 将之前的 Vue.prototype.$mount 暂存，在新的 Vue.prototype.$mount 中会调用之前的
 const mount = Vue.prototype.$mount
+
+// 从主干代码我们可以看出做了以下几件事：
+//    1、由于el参数有两种类型，可能是string 或者 element，调用query方法，统一转化为Element类型
+//    2、如果没有手写render函数， 那么先获取template内容。再将template做为参数，调用compileToFunctions方法，返回render函数。
+//    3、最后调用mount.call，这个方法实际上会调用runtime/index.js的mount方法
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
@@ -33,6 +39,10 @@ Vue.prototype.$mount = function (
   // resolve template/el and convert to render function
   if (!options.render) {
     let template = options.template
+
+    // 如果存在template配置项：
+    // 1. template 可能是"#xx"，那么根据id获取 element 内容
+    // 2. 如果 template 存在 nodeType，那么获取 template.innerHTML 内容
     if (template) {
       if (typeof template === 'string') {
         if (template.charAt(0) === '#') {
@@ -54,6 +64,12 @@ Vue.prototype.$mount = function (
         return this
       }
     } else if (el) {
+      // 如果 template 不存在，el存在：
+      // 例如： new Vue({
+      //         el: "#app",
+      //         ...
+      //       })
+      // 那么根据el获取对应的element内容
       template = getOuterHTML(el)
     }
     if (template) {
@@ -71,7 +87,7 @@ Vue.prototype.$mount = function (
         delimiters: options.delimiters,
         comments: options.comments
       }, this)
-      // 将编译出的render挂载到options上
+      // 将编译出的render挂载到 $options 上
       options.render = render
       options.staticRenderFns = staticRenderFns
 

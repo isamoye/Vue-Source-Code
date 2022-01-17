@@ -147,8 +147,10 @@ export function mountComponent (
   vm: Component,
   el: ?Element,
   hydrating?: boolean
-): Component {
+): Component{
   vm.$el = el
+  // 如果组件模板不是render函数（我们在开发中可以是正常的vue形式也可以是直接写render方式）
+  // 那么创建一个空的 render 占位符，并且校验 template
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
@@ -169,8 +171,13 @@ export function mountComponent (
       }
     }
   }
+
+  //执行 beforeMount 生命周期钩子
   callHook(vm, 'beforeMount')
 
+  // 定义updateComponent方法
+  // 注意为什么我们在定义这个方法之后没有看到这个方法被执行呢，只是因为我们在第211行的new Watcher
+  // 的时候将 updateComponent 做为参数，实例化Watch，它在始化的时候会执行回调函数。
   let updateComponent
   /* istanbul ignore if */
   if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -191,13 +198,14 @@ export function mountComponent (
       measure(`vue ${name} patch`, startTag, endTag)
     }
   } else {
-    // vm._update 通过虚拟dom 创建 真实dom,用于更新或渲染真实的dom节点。方法在：【src/core/instance/lifecycle.js，当前文件上面】
-    // vm._render 通过解析的render方法 渲染出虚拟dom。方法在：【src/core/instance/render.js】
+    // vm._update： 通过虚拟 dom 创建真实dom,用于更新或渲染真实的dom节点。方法在：【src/core/instance/lifecycle.js，当前文件上面】
+    // vm._render： 通过解析的 render 方法 渲染出虚拟dom。方法在：【src/core/instance/render.js】
     updateComponent = () => {
       vm._update(vm._render(), hydrating)
     }
   }
 
+  // 在此处
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined

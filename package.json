@@ -41,17 +41,8 @@
     "release": "bash scripts/release.sh",
     "release:weex": "bash scripts/release-weex.sh",
     "release:note": "node scripts/gen-release-note.js",
-    "commit": "git-cz"
-  },
-  "gitHooks": {
-    "pre-commit": "lint-staged",
-    "commit-msg": "node scripts/verify-commit-msg.js"
-  },
-  "lint-staged": {
-    "*.js": [
-      "eslint --fix",
-      "git add"
-    ]
+    "commit": "git-cz",
+    "lint-fix": "eslint --fix --ext .js --ext .jsx --ext .vue src/ test/unit test/e2e/specs"
   },
   "repository": {
     "type": "git",
@@ -85,7 +76,7 @@
     "babel-preset-flow-vue": "^1.0.0",
     "buble": "^0.19.3",
     "chalk": "^2.3.0",
-    "chromedriver": "^2.45.0",
+    "chromedriver": "^2.46.0",
     "codecov": "^3.0.0",
     "commitizen": "^2.9.6",
     "conventional-changelog": "^1.1.3",

@@ -33,7 +33,7 @@ extend(Vue.options.components, platformComponents)
 // install platform patch function
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
-// 公共的mount方法，也就是渲染的方法入口
+// 公共的mount方法，也就是渲染的方法入口，注意与【src/platform/web/entry-runtime-with-compiler.js】中的Vue.prototype.$mount区分
 // public mount method
 Vue.prototype.$mount = function (
   el?: string | Element,

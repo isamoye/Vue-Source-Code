@@ -25,36 +25,42 @@ let uid = 0
  * This is used for both the $watch() api and directives.
  */
 export default class Watcher {
-  vm: Component;
-  expression: string;
-  cb: Function;
-  id: number;
-  deep: boolean;
-  user: boolean;
-  lazy: boolean;
-  sync: boolean;
-  dirty: boolean;
-  active: boolean;
-  deps: Array<Dep>;
-  newDeps: Array<Dep>;
-  depIds: SimpleSet;
-  newDepIds: SimpleSet;
-  before: ?Function;
-  getter: Function;
-  value: any;
+  vm: Component;        //实例；
+  expression: string;   //表达式，要监听的value的值的字符串表达式；
+  cb: Function;         //回调函数；
+  id: number;           //当前watcher实例的一个计数，从1开始；
+  deep: boolean;        //是否深度监听。取值为option.deep，默认为【false】；
+  user: boolean;        //是否是用户触发的watcher。取值为option.user，只有$watcher调用生成的watcher实例才是true，其他为【false】；
+  lazy: boolean;        //是否懒处理。取值为option.lazy，只用computed的属性创建的实力才会是true，默认为【false】；
+  sync: boolean;        //是否是同步执行。取值为option.lazy，只有watcher调用生成的watcher的时候才可能是true(之所以可能是true是因为此值是由用户调用watch的时候传进来的，只有传为true的时候才会为true)，默认为【false】
+  dirty: boolean;       //是否对该执行进行重新获取。只有computed属性创建的实例才会是true，默认为【false】；
+  active: boolean;      //当前watcher是否还有效，默认为【true】；
+  deps: Array<Dep>;     //是一个用于存储依赖Dep的数组，默认为[]；
+  newDeps: Array<Dep>;  //是一个用于存储依赖Dep的数组，默认为[].与上面的区别在于此次更新后收集下一轮更新所相关的依赖；
+  depIds: SimpleSet;    //存储deps对应的id所组成的Set(es6一种新的数据格式)，默认为空Set；
+  newDepIds: SimpleSet; //存储newDeps对应的id所组成的Set(es6一种新的数据格式)，默认为空Set；
+  before: ?Function;    //函数，存储更新之前所需要调用的函数，取值为option.before，可以为空
+  getter: Function;     //获取监听的value的函数
+  value: any;           //值，监听对象的值
 
   constructor (
-    vm: Component,
-    expOrFn: string | Function,
-    cb: Function,
-    options?: ?Object,
-    isRenderWatcher?: boolean
+    vm: Component,              //实例
+    expOrFn: string | Function, //表达式或者函数，用于获取value使用
+    cb: Function,               //回调函数
+    options?: ?Object,          //可选参数，对象类型，配置信息，可以配置deep user lazy sync before等五个参数
+    isRenderWatcher?: boolean   //是否是渲染函数，只用mount函数传过来的才是true
   ) {
     this.vm = vm
+
+    //判断是否是渲染watcher，如果是：把当前watcher赋值给vm._watcher（vm._watcher在初始化的initLifecycle方法中生成的）
     if (isRenderWatcher) {
       vm._watcher = this
     }
+
+    //把当前watcher储存到vm._watchers（vm._watchers在初始化initState方法中生成的）
     vm._watchers.push(this)
+
+    //将传入的option进行处理，将其赋值给watcher实例
     // options
     if (options) {
       this.deep = !!options.deep
@@ -65,6 +71,8 @@ export default class Watcher {
     } else {
       this.deep = this.user = this.lazy = this.sync = false
     }
+
+    //默认值设定
     this.cb = cb
     this.id = ++uid // uid for batching
     this.active = true
@@ -73,9 +81,9 @@ export default class Watcher {
     this.newDeps = []
     this.depIds = new Set()
     this.newDepIds = new Set()
-    this.expression = process.env.NODE_ENV !== 'production'
-      ? expOrFn.toString()
-      : ''
+    this.expression = process.env.NODE_ENV !== 'production' ? expOrFn.toString() : ''
+
+    //根据expOrFn处理getter，函数的话直接赋值，否则调用parsePath，获取调用的函数
     // parse expression for getter
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
@@ -91,9 +99,9 @@ export default class Watcher {
         )
       }
     }
-    this.value = this.lazy
-      ? undefined
-      : this.get()
+
+    //获取value，如果是懒处理则暂时为undefined，否则调用get方法
+    this.value = this.lazy ? undefined : this.get()
   }
 
   /**
