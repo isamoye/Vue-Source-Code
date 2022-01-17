@@ -52,11 +52,13 @@
     "vue"
   ],
   "author": "Evan You",
+  "commentator": "isamoye",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/vuejs/vue/issues"
   },
-  "homepage": "https://github.com/vuejs/vue#readme",
+  "homepage1": "https://github.com/vuejs/vue#readme",
+  "homepage2": "https://github.com/isamoye/Vue-Source-Code",
   "devDependencies": {
     "@babel/core": "^7.0.0",
     "@babel/plugin-proposal-class-properties": "^7.1.0",
