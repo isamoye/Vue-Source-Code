@@ -11,29 +11,34 @@ let uid = 0
  * directives subscribing to it.
  */
 export default class Dep {
-  static target: ?Watcher;
-  id: number;
-  subs: Array<Watcher>;
+  static target: ?Watcher;  //当前所处理的watcher实例，此处会在
+  id: number;               //每个dep都有唯一的id
+  subs: Array<Watcher>;     //用于收集依赖Watcher
 
+  //构造函数，初始化一个dep实例赋值
   constructor () {
     this.id = uid++
     this.subs = []
   }
 
+  //依赖收集函数
   addSub (sub: Watcher) {
     this.subs.push(sub)
   }
 
+  //删除依赖函数
   removeSub (sub: Watcher) {
     remove(this.subs, sub)
   }
 
+  //依赖收集函数，此处会调用 Watcher 的 addDep 方法
   depend () {
     if (Dep.target) {
       Dep.target.addDep(this)
     }
   }
 
+  //通知函数，此处会循环调用所收集的所有 Watcher，调用执行他们的 update 方法
   notify () {
     // stabilize the subscriber list first
     const subs = this.subs.slice()

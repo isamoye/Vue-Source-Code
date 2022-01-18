@@ -190,6 +190,7 @@ export const hyphenate = cached((str: string): string => {
  */
 
 /* istanbul ignore next */
+//当浏览器不支持原生的bind方法时，使用apply||call实现bind的效果
 function polyfillBind (fn: Function, ctx: Object): Function {
   function boundFn (a) {
     const l = arguments.length
@@ -204,10 +205,12 @@ function polyfillBind (fn: Function, ctx: Object): Function {
   return boundFn
 }
 
+//原生bind事件
 function nativeBind (fn: Function, ctx: Object): Function {
   return fn.bind(ctx)
 }
 
+//如果浏览器支持Function类的Function.prototype.bind属性那么直接使用原生的bind方法，否则使用封装后等效的自定义方法实现bind效果
 export const bind = Function.prototype.bind
   ? nativeBind
   : polyfillBind
@@ -255,6 +258,7 @@ export function toObject (arr: Array<any>): Object {
  * Stubbing args to make Flow happy without leaving useless transpiled code
  * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/).
  */
+//一个空函数，为的就是无论入参是什么么样的都没有任何影响
 export function noop (a?: any, b?: any, c?: any) {}
 
 /**

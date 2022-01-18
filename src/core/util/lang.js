@@ -10,6 +10,7 @@ export const unicodeRegExp = /a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037
 /**
  * Check if a string starts with $ or _
  */
+//判断当前字符串是否是以 $ 或者 _ 开头
 export function isReserved (str: string): boolean {
   const c = (str + '').charCodeAt(0)
   return c === 0x24 || c === 0x5F
@@ -18,6 +19,7 @@ export function isReserved (str: string): boolean {
 /**
  * Define a property.
  */
+//为出入对象新增（修改）定义一个属性
 export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
   Object.defineProperty(obj, key, {
     value: val,
