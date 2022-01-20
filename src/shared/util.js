@@ -2,20 +2,23 @@
 
 export const emptyObject = Object.freeze({})
 
-// These helpers produce better VM code in JS engines due to their
-// explicitness and function inlining.
+
+//判断是否是无定义的
 export function isUndef (v: any): boolean %checks {
   return v === undefined || v === null
 }
 
+//判断是否是有定义的
 export function isDef (v: any): boolean %checks {
   return v !== undefined && v !== null
 }
 
+//判断是否是布尔true
 export function isTrue (v: any): boolean %checks {
   return v === true
 }
 
+//判断是否是布尔false
 export function isFalse (v: any): boolean %checks {
   return v === false
 }
@@ -23,6 +26,7 @@ export function isFalse (v: any): boolean %checks {
 /**
  * Check if value is primitive.
  */
+//判断是否是简单数据类型
 export function isPrimitive (value: any): boolean %checks {
   return (
     typeof value === 'string' ||
@@ -38,6 +42,7 @@ export function isPrimitive (value: any): boolean %checks {
  * objects from primitive values when we know the value
  * is a JSON-compliant type.
  */
+//判断是否是对象类型
 export function isObject (obj: mixed): boolean %checks {
   return obj !== null && typeof obj === 'object'
 }
@@ -55,6 +60,39 @@ export function toRawType (value: any): string {
  * Strict object type check. Only returns true
  * for plain JavaScript objects.
  */
+//判断指定参数是否是一个纯粹的对象
+
+//问：是不是很好奇什么是plainObject?
+//答：plainObject是指通过 { }、new Object()、Object.create(null) 创建的对象。
+//   例：
+//      isPlainObject({})//true
+//      isPlainObject(new Object)//true
+//      isPlainObject(Object.create(null))//true
+//      isPlainObject([])//false
+//      isPlainObject(fun)//true
+//      isPlainObject(arr)//false
+//      isPlainObject(arr1)//false
+//
+//        var fun = {
+//          handler: function (val, oldVal) {
+//            console.log(55)
+//          },
+//          arr: [1, 2],
+//          immediate: true
+//        }
+//
+//        var arr = [
+//          'handle1',
+//          function handle2(val, oldVal) {
+//            console.log(55)
+//          },
+//          {
+//            handler: function handle3(val, oldVal) {
+//              console.log(55)
+//            },
+//          }
+//        ]
+//        var arr1=[1,2.3,5,6,9,8,4,5]
 export function isPlainObject (obj: any): boolean {
   return _toString.call(obj) === '[object Object]'
 }
@@ -71,6 +109,7 @@ export function isValidArrayIndex (val: any): boolean {
   return n >= 0 && Math.floor(n) === n && isFinite(val)
 }
 
+//判断是否是promise对象
 export function isPromise (val: any): boolean {
   return (
     isDef(val) &&

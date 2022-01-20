@@ -33,24 +33,22 @@ export function handleError (err: Error, vm: any, info: string) {
   }
 }
 
-/**
- * 通用函数，执行指定函数 handler
- * 传递进来的函数会被用 try catch 包裹，进行异常捕获处理
- */
+//通用函数，执行指定函数 handler ，传递进来的函数会被用 try catch 包裹，进行异常捕获处理
 export function invokeWithErrorHandling (
   handler: Function,  //需要执行的函数
   context: any,       //上下文
-  args: null | any[],
-  vm: any,            //实例参数
-  info: string
+  args: null | any[], //参数
+  vm: any,            //实例
+  info: string        //异常提示文本
 ) {
   let res
   try {
     // 执行需要执行的函数，再此做了一次错误捕获
     res = args ? handler.apply(context, args) : handler.call(context)
+
     if (res && !res._isVue && isPromise(res) && !res._handled) {
       res.catch(e => handleError(e, vm, info + ` (Promise/async)`))
-      // issue #9511
+      //避免在嵌套调用时多次捕获触发
       // avoid catch triggering multiple times when nested calls
       res._handled = true
     }

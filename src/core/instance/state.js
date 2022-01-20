@@ -36,6 +36,7 @@ const sharedPropertyDefinition = {
   set: noop
 }
 
+//将
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -77,7 +78,7 @@ export function initState (vm: Component) {
 
 function initProps (vm: Component, propsOptions: Object) {
   //
-  const propsData = vm.$options.propsData || {}
+   const propsData = vm.$options.propsData || {}
 
   //在vm实例上添加_props属性
   const props = vm._props = {}
@@ -215,8 +216,8 @@ export function getData (data: Function, vm: Component): any {
   }
 }
 
+//用于computed处理的配置数据
 const computedWatcherOptions = { lazy: true }
-
 
 /**
  * 三件事：
@@ -299,12 +300,14 @@ export function defineComputed (
   //判断当前的运行环境是否是在服务器环境下，从而设置是否应该缓存
   const shouldCache = !isServerRendering()
 
-  //此处根据shouldCache判断是否对computed进行缓存处理，从而设置其get的处理逻辑
-  //如果需要进行缓存处理(shouldCache为true)：
-  //   直接使用该可以对应的已经存在的watcher，
-  //如果不需要进行缓存处理(shouldCache为false):
-  //   直接重新执行该key对应的【执行对象】
+  //userDef为函数时，调用createComputedGetter函数生成get函数，set函数为空函数
+  //serDef不为函数时，get函数为createComputedGetter或者createGetterInvoker生成的函数；
   if (typeof userDef === 'function') {
+    //此处根据shouldCache判断是否对computed进行缓存处理，从而设置其get的处理逻辑
+    //如果需要进行缓存处理(shouldCache为true)：
+    //   直接使用该可以对应的已经存在的watcher，
+    //如果不需要进行缓存处理(shouldCache为false):
+    //   直接重新执行该key对应的【执行对象】
     sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
       : createGetterInvoker(userDef)
@@ -330,6 +333,7 @@ export function defineComputed (
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+//通过对该key的watcher进行处理和封装，返回一个用于监听computed改变的getter的方法
 function createComputedGetter (key) {
   return function computedGetter () {
     //获取该key在初始化时构建的watcher
@@ -337,10 +341,12 @@ function createComputedGetter (key) {
     if (watcher) {
       //这里的watcher.dirty其实就是初始化的时候我们new Watcher传入的computedWatcherOptions.lazy
       if (watcher.dirty) {
-        //当watcher.dirty为true，也就是在浏览器环境下computed模块下。调用watcher.evaluate()会
+        //当watcher.dirty为true，也就是在浏览器环境下computed模块下。
+        //调用watcher.evaluate()会获取当前watcher的value，并且把dirty置为false
         watcher.evaluate()
       }
       if (Dep.target) {
+        //对该watcher重新收集依赖
         watcher.depend()
       }
       return watcher.value
@@ -348,6 +354,7 @@ function createComputedGetter (key) {
   }
 }
 
+//为传入的方法添加执行上下文后返回该方法
 function createGetterInvoker(fn) {
   return function computedGetter () {
     return fn.call(this, this)
@@ -385,10 +392,32 @@ function initMethods (vm: Component, methods: Object) {
   }
 }
 
+
+/**
+ * watch: {
+    telephone: function(){},              --执行函数类型为function
+    name: 'printName',                    --执行函数类型为string
+    message: ['printName', 'printValue'], --执行函数类型为array
+    address:{
+      deep: true,
+      handler: function(){},
+      immediate: true
+    },                                    --执行函数类型为object
+  },
+ methods: {
+    printName(){},
+    printValue() {}
+  }
+ */
 function initWatch (vm: Component, watch: Object) {
+  //遍历watch属性对象
   for (const key in watch) {
+    //缓存
     const handler = watch[key]
+
+    //对该key的参数进行判断，区分数组类型和其他类型参数进行区分
     if (Array.isArray(handler)) {
+      //如果是数组则会对数组里的执行函数进行循环创建watcher处理
       for (let i = 0; i < handler.length; i++) {
         createWatcher(vm, key, handler[i])
       }
@@ -398,26 +427,41 @@ function initWatch (vm: Component, watch: Object) {
   }
 }
 
+/**
+ * 两件事：
+ *   1、兼容性处理，保证 handler 肯定是一个函数
+ *   2、调用 $watch
+ * @returns
+ */
 function createWatcher (
   vm: Component,
   expOrFn: string | Function,
   handler: any,
   options?: Object
 ) {
+  //如果该key的执行函数是对象类型，则获取其中的 handler 选项的值
   if (isPlainObject(handler)) {
     options = handler
     handler = handler.handler
   }
+
+  //如果该key的执行函数是字符串类型，即该字符串名为方法名，则去vm实例上找对应的方法函数，将其赋值给handle
   if (typeof handler === 'string') {
     handler = vm[handler]
   }
-  return vm.$watch(expOrFn, handler, options)
+
+  //如果该执行函数不是object、string类型，于是就只剩下function类型(array类型已经在initWatch中处理了)
+
+  return vm.$watch(expOrFn, handler, options)//vm.$watch方法原型在下面stateMixin中
 }
+
 
 export function stateMixin (Vue: Class<Component>) {
   // flow somehow has problems with directly declared definition object
   // when using Object.defineProperty, so we have to procedurally build up
   // the object here.
+
+  //为vue原型设置$data和$props属性，并设置set和get
   const dataDef = {}
   dataDef.get = function () { return this._data }
   const propsDef = {}
@@ -437,27 +481,59 @@ export function stateMixin (Vue: Class<Component>) {
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
+  //实例方法---vm.$set
   Vue.prototype.$set = set
+
+  //实例方法---vm.$delete
   Vue.prototype.$delete = del
 
+  //实例方法---vm.$watch
+  /**创建 watcher，返回 unwatch，共完成如下 5 件事：
+    1、兼容性处理，保证最后 new Watcher 时的 cb 为函数
+    2、标示用户 watcher
+    3、创建 watcher 实例
+    4、如果设置了 immediate，则立即执行一次 cb
+    5、返回 unwatch*/
   Vue.prototype.$watch = function (
-    expOrFn: string | Function,
-    cb: any,
-    options?: Object
+    expOrFn: string | Function, //需要进行监听的key或者方法
+    cb: any,                    //回调函数，当key的属性改变的时候会调用此回调函数
+    options?: Object            //在watcher处理时需要传的配置选项
   ): Function {
     const vm: Component = this
+
+    // 因为上一步做了兼容性处理，保证传入的的cb为function，
+    // 但是如果存在这种watcher的话则需要进一步处理：
+    //    watch:{
+    //     address:{
+    //       deep: true,
+    //       handler: {
+    //         handler：function(){}
+    //       },
+    //       immediate: true
+    //     },
+    //    }
     if (isPlainObject(cb)) {
       return createWatcher(vm, expOrFn, cb, options)
     }
+
+    //将传入的options作为创建watcher的options
     options = options || {}
+
+    //是用户触发的watcher
     options.user = true
+
+    //为该key的watch创建一个watcher
     const watcher = new Watcher(vm, expOrFn, cb, options)
+
+    //如果用户设置了immediate属性为true，则立即执行一次回调函数(也就是该key对应的执行函数)
     if (options.immediate) {
       const info = `callback for immediate watcher "${watcher.expression}"`
       pushTarget()
       invokeWithErrorHandling(cb, vm, [watcher.value], vm, info)
       popTarget()
     }
+
+    //返回一个 unwatchFn 函数，此函数为watcher的销毁函数
     return function unwatchFn () {
       watcher.teardown()
     }
