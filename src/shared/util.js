@@ -267,6 +267,7 @@ export function toArray (list: any, start?: number): Array<any> {
   return ret
 }
 
+//将后一个对象的属性注入到前一个对象中去，并把注入后的对象返回出去
 /**
  * Mix properties into target object.
  */

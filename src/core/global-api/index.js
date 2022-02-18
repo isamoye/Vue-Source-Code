@@ -41,16 +41,22 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     defineReactive
   }
 
+  //1、set
+  // Vue.set()是将set函数绑定在Vue构造函数上，
   Vue.set = set
+  //2、del
   Vue.delete = del
+  //3、nextTick
   Vue.nextTick = nextTick
 
+  //4、observable
   // 2.6 explicit observable API
   Vue.observable = <T>(obj: T): T => {
     observe(obj)
     return obj
   }
 
+  //options---这个里面有不少东西
   Vue.options = Object.create(null)
   ASSET_TYPES.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)
@@ -60,10 +66,18 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   // components with in Weex's multi-instance scenarios.
   Vue.options._base = Vue
 
+  // 将Keep_alive的配置参数全部注入到 Vue.options.components 属性中去，
+  // 我们仔细阅读keep_alive的话会发现这是一个组件，这就是为什么我们能直接使用<keep-alive></keep-alive>
   extend(Vue.options.components, builtInComponents)
 
+  //5、use
   initUse(Vue)
+  //6、mixin
   initMixin(Vue)
+  //7、extend
   initExtend(Vue)
+  //8、component
+  //9、directive
+  //10、filter
   initAssetRegisters(Vue)
 }

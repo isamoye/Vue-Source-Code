@@ -263,23 +263,32 @@ export function defineReactive (
  */
 export function set (
     target: Array<any> | Object,
-    key: any, val: any
+    key: any,
+    val: any
 ): any {
   if (process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))
   ) {
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+
+  //如果传入的属性对象时数组时，
   if (Array.isArray(target) && isValidArrayIndex(key)) {
+    // 因为我们向响应式的原数组中添加了参数，但是数组不能自动识别，所以需要手动更改数组的length属性
     target.length = Math.max(target.length, key)
+    // 将该属性对象插入到数组中
     target.splice(key, 1, val)
     return val
   }
+
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
   }
+
+  // 凡是对象上有 __ob__ 说明已经被observer处理过了
   const ob = (target: any).__ob__
+  // 添加的对象不能是 Vue 实例，或者 Vue 实例的根数据对象
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
@@ -287,12 +296,18 @@ export function set (
     )
     return val
   }
+  // 如果原对象不是响应式的那么直接将该属性对象添加进去就行了
   if (!ob) {
     target[key] = val
     return val
   }
+
+  // 如果需要处理的属性对象皆符合要求，则对该属性对象进行响应式处理
   defineReactive(ob.value, key, val)
+
+  // 通知依赖，触发视图更新
   ob.dep.notify()
+
   return val
 }
 
@@ -308,11 +323,17 @@ export function del (
   ) {
     warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+
+  // 如果我们要删除的原对象是数组时
   if (Array.isArray(target) && isValidArrayIndex(key)) {
+    // 我们会调用vue处理过后的splice方法，以便我们能检测到对应的数据被删除，会触发视图更新
     target.splice(key, 1)
     return
   }
+
+  // 凡是对象上有 __ob__ 说明已经被observer处理过了
   const ob = (target: any).__ob__
+  // 被删除的对象不能是一个 Vue 实例或 Vue 实例的根数据对象
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid deleting properties on a Vue instance or its root $data ' +
@@ -320,19 +341,27 @@ export function del (
     )
     return
   }
+
+  // 如果被删除对象本来就没有你要删除的那个东西的话，就当做什么也没发生过一样
   if (!hasOwn(target, key)) {
     return
   }
+
+  // 以上要求都不满足的话，那么就说明被删除对象是一个Object，那么就直接使用Object.delete方法就好了
   delete target[key]
+
   if (!ob) {
     return
   }
+
+  // 通知依赖，触发视图更新
   ob.dep.notify()
 }
 
 /**
  * Collect dependencies on array elements when the array is touched, since
  * we cannot intercept array element access like property getters.
+ * 翻译：在变动数组时收集对数组元素的依赖关系，因为我们不能像属性getter那样拦截数组元素访问。
  */
 function dependArray (value: Array<any>) {
   for (let e, i = 0, l = value.length; i < l; i++) {

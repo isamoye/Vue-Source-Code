@@ -54,9 +54,11 @@ export default class Dep {
   }
 }
 
-// The current target watcher being evaluated.
+
+/* The current target watcher being evaluated.
 // This is globally unique because only one watcher
 // can be evaluated at a time.
+// 这是全局唯一的，因为一次只能评估一个观察者。*/
 Dep.target = null
 const targetStack = []
 

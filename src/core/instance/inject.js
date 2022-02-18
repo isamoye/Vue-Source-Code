@@ -14,9 +14,13 @@ export function initProvide (vm: Component) {
 }
 
 export function initInjections (vm: Component) {
+  // 将组件中的 inject 属性解析出来
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
+    // 为了不为provide值添加响应式监听
     toggleObserving(false)
+
+    // 对inject的参数进行响应式处理
     Object.keys(result).forEach(key => {
       /* istanbul ignore else */
       if (process.env.NODE_ENV !== 'production') {
@@ -32,6 +36,8 @@ export function initInjections (vm: Component) {
         defineReactive(vm, key, result[key])
       }
     })
+
+    // 使得其他属性可以监听
     toggleObserving(true)
   }
 }

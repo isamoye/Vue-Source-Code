@@ -481,7 +481,8 @@ export function stateMixin (Vue: Class<Component>) {
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
-  //实例方法---vm.$set
+  // 实例方法---vm.$set
+  // this.$set()是将set函数绑定在Vue原型上
   Vue.prototype.$set = set
 
   //实例方法---vm.$delete

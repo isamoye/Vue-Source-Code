@@ -35,6 +35,7 @@ export function initLifecycle (vm: Component) {
   // locate first non-abstract parent
   let parent = options.parent
   if (parent && !options.abstract) {
+    // 向上递归寻找父节点，并把自身挂到父节点的 $children 下
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
@@ -358,7 +359,7 @@ export function callHook (vm: Component, hook: string) {
   const handlers = vm.$options[hook]
   const info = `${hook} hook`
   if (handlers) {
-    // 通过 invokeWithErrorHandler 遍历该生命周期中的函数执行
+    // 通过 invokeWithErrorHandler 遍历该生命周期中的函数执行(因为一个生命周期可能存在多个方法)
     for (let i = 0, j = handlers.length; i < j; i++) {
       invokeWithErrorHandling(handlers[i], vm, null, vm, info)
     }

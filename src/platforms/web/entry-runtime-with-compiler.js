@@ -117,6 +117,7 @@ function getOuterHTML (el: Element): string {
   }
 }
 
+//12、compile
 Vue.compile = compileToFunctions
 
 export default Vue

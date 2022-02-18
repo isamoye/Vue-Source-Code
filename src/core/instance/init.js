@@ -64,7 +64,7 @@ export function initMixin(Vue: Class<Component>) {
     // 以及一些新增的配置项参数，比如：_watcher、_inactive、_isMounted、_isDestroyed等
     initLifecycle(vm)
 
-    //
+    // 初始化事件处理机制
     initEvents(vm)
     // 解析、初始化$slot，为实例挂载处理渲染函数，得到 vm.$createElement 方法，即 h 函数
     initRender(vm)
@@ -112,11 +112,23 @@ export function initInternalComponent(vm: Component, options: InternalComponentO
   }
 }
 
+// 解析构造函数选项
 export function resolveConstructorOptions(Ctor: Class<Component>) {
+  //传入的Ctor是就是vue的构造函数
   let options = Ctor.options
+
+  // Ctor.super 来判断该类是否是Vue的子类
+  // 有super属性，说明Ctor是Vue.extend构建的子类
   if (Ctor.super) {
     const superOptions = resolveConstructorOptions(Ctor.super)
+
+    // Vue构造函数上的options,如directives, filters, components ...
     const cachedSuperOptions = Ctor.superOptions
+
+    /* 校验父类中的 options 有没有发生变化
+     * 当为Vue混入一些options时，superOptions会发生变化，
+     * 此时与之前子类中存储的 cachedSuperOptions 已经不等，
+     * 所以下面的操作主要就是更新sub.superOptions */
     if (superOptions !== cachedSuperOptions) {
       // super option changed,
       // need to resolve new options.
@@ -127,6 +139,8 @@ export function resolveConstructorOptions(Ctor: Class<Component>) {
       if (modifiedOptions) {
         extend(Ctor.extendOptions, modifiedOptions)
       }
+
+      // 调用 mergeOptions 合并父类的 options(superOptions) 和 Ctor 的 extendOptions
       options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions)
       if (options.name) {
         options.components[options.name] = Ctor
