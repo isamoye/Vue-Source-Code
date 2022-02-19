@@ -156,9 +156,9 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 //      1、initInjections，对依赖进行处理的时候，会对inject的key进行响应化调用；
 //      2、initRender，对attrs和attrs和attrs和listeners对象进行浅式响应化调用；
 //      3、initState里面的initProps，会对props进行响应化调用；
-//      4、上面说到的walk里面会调用；
-//      5、set函数里面会调用，包括Vue.set和原型对象上的$set里面；
-// 【二】、每次调用defineReactive，都有一个唯一的Dep实例与当前value一一对应
+//      4、上面说到的walk里面会调用,也是 Observer 类中；
+//      5、set函数里面会调用，包括 Vue.set 和原型对象上的$set里面；
+// 【二】、每次调用 defineReactive ，都有一个唯一的Dep实例与当前value一一对应
 export function defineReactive (
   obj: Object,              //要进行响应式处理的整个对象
   key: string,              //当前整个对象里需要处理成响应式的那个属性
@@ -199,61 +199,61 @@ export function defineReactive (
 
   //如果不是浅式相应，那么对其子属性递归进行observer处理，从而保证保证对象(数值)中的所有 key 都被观察
   let childOb = !shallow && observe(val)
-    Object.defineProperty(obj, key, {
-        enumerable: true,
-        configurable: true,
-        get: function reactiveGetter() {
-            //首先调用原生的getter方法获取到value值
-            const value = getter ? getter.call(obj) : val
+  Object.defineProperty(obj, key, {
+      enumerable: true,
+      configurable: true,
+      get: function reactiveGetter() {
+          //首先调用原生的getter方法获取到value值
+          const value = getter ? getter.call(obj) : val
 
-            //判断是否有Dep.target(是一个Watcher对象)
-            if (Dep.target) {
-                //如果存在则调用收集依赖函数dep.depend()
-                dep.depend()
+          //判断是否有Dep.target(是一个Watcher对象)
+          if (Dep.target) {
+              //如果存在则调用收集依赖函数dep.depend()
+              dep.depend()
 
-                //判断childOb是否存在，若存在则直接对childOb进行依赖收集
-                if (childOb) {
-                    childOb.dep.depend()
+              //判断childOb是否存在，若存在则直接对childOb进行依赖收集
+              if (childOb) {
+                  childOb.dep.depend()
 
-                    //当我们获取到对象obj中key对应的value值是数组时，我们需要对数组中的每个元素进行依赖收集(因为数组跟对象不一样)
-                    if (Array.isArray(value)) {
-                        dependArray(value)
-                    }
-                }
-            }
-            return value
-        },
-        set: function reactiveSetter(newVal) {
-            //首先调用原生的getter方法获取到value值
-            const value = getter ? getter.call(obj) : val
+                  //当我们获取到对象obj中key对应的value值是数组时，我们需要对数组中的每个元素进行依赖收集(因为数组跟对象不一样)
+                  if (Array.isArray(value)) {
+                      dependArray(value)
+                  }
+              }
+          }
+          return value
+      },
+      set: function reactiveSetter(newVal) {
+          //首先调用原生的getter方法获取到value值
+          const value = getter ? getter.call(obj) : val
 
-            //将新值与老值比较，如果没有发生变化则直接返回
-            if (newVal === value || (newVal !== newVal && value !== value)) {
-                return
-            }
+          //将新值与老值比较，如果没有发生变化则直接返回
+          if (newVal === value || (newVal !== newVal && value !== value)) {
+              return
+          }
 
-            //如果用户设置的set函数时的回调，那么在生产环境下则执行该函数
-            if (process.env.NODE_ENV !== 'production' && customSetter) {
-                customSetter()
-            }
-            //如果这个属性是不可写的则直接返回
-            // #7981: for accessor properties without setter
-            if (getter && !setter) return
+          //如果用户设置的set函数时的回调，那么在生产环境下则执行该函数
+          if (process.env.NODE_ENV !== 'production' && customSetter) {
+              customSetter()
+          }
+          //如果这个属性是不可写的则直接返回
+          // #7981: for accessor properties without setter
+          if (getter && !setter) return
 
-            //如果原生setter存在则用原生setter进行赋值。否则将新值赋值给默认值val
-            if (setter) {
-                setter.call(obj, newVal)
-            } else {
-                val = newVal
-            }
+          //如果原生setter存在则用原生setter进行赋值。否则将新值赋值给默认值val
+          if (setter) {
+              setter.call(obj, newVal)
+          } else {
+              val = newVal
+          }
 
-            //如果不是浅式相应，那么对新的参数重新收集依赖
-            childOb = !shallow && observe(newVal)
+          //如果不是浅式相应，那么对新的参数重新收集依赖
+          childOb = !shallow && observe(newVal)
 
-            //调用dep.notify进行通知更新，notify会调用dep对象下面所有的依赖watcher对象下面的update方法进行更新操作
-            dep.notify()
-        }
-    })
+          //调用dep.notify进行通知更新，notify会调用dep对象下面所有的依赖watcher对象下面的update方法进行更新操作
+          dep.notify()
+      }
+  })
 }
 
 /**
