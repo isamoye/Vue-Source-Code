@@ -4,6 +4,7 @@ import { extend } from 'shared/util'
 import { detectErrors } from './error-detector'
 import { createCompileToFunctionFn } from './to-function'
 
+//这里的baseCompile方法在 src/compiler/index.js 中，作用是"生成渲染函数"
 export function createCompilerCreator (baseCompile: Function): Function {
   return function createCompiler (baseOptions: CompilerOptions) {
     /**
@@ -86,7 +87,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
       // 将编译期间产生的错误和提示挂载到编译结果上
       compiled.errors = errors
       compiled.tips = tips
-      return compiled
+      return compiled   //这个是生成的渲染函数，也就是 src/compiler/index.js 的 createCompiler 变量要接受的真实数据
     }
 
     return {

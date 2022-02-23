@@ -69,7 +69,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
       return cache[key]
     }
 
-    // 执行编译函数，得到编译结果
+    // ⭐️执行编译函数，得到编译结果
     const compiled = compile(template, options)
 
     // 检查编译期间产生的 error 和 tip，分别输出到控制台

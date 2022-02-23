@@ -96,7 +96,6 @@ Vue.prototype.$mount = function (
       // 返回的参数有两个render：
       //                      render函数；
       //                      staticRenderFns：静态render（比如v-once、静态文字等编译出来的）
-
       const { render, staticRenderFns } = compileToFunctions(template, {
         // 在非生产环境下，编译时记录标签属性在模版字符串中开始和结束的位置索引
         outputSourceRange: process.env.NODE_ENV !== 'production',
