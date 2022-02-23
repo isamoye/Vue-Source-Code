@@ -257,9 +257,8 @@ export function defineReactive (
 }
 
 /**
- * Set a property on an object. Adds the new property and
- * triggers change notification if the property doesn't
- * already exist.
+ * 通过 Vue.set 或者 this.$set 方法给 target 的指定 key 设置值 val
+ * 如果 target 是对象，并且 key 原本不存在，则为新 key 设置响应式，然后执行依赖通知
  */
 export function set (
     target: Array<any> | Object,
@@ -272,7 +271,8 @@ export function set (
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
 
-  //如果传入的属性对象时数组时，
+
+  //如果传入的属性对象时数组时，更新数组指定下标的元素，Vue.set(array, idx, val)，通过 splice 方法实现响应式更新
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     // 因为我们向响应式的原数组中添加了参数，但是数组不能自动识别，所以需要手动更改数组的length属性
     target.length = Math.max(target.length, key)
@@ -280,7 +280,7 @@ export function set (
     target.splice(key, 1, val)
     return val
   }
-
+  // 更新对象已有属性，Vue.set(obj, key, val)，执行更新即可
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
@@ -288,7 +288,10 @@ export function set (
 
   // 凡是对象上有 __ob__ 说明已经被observer处理过了
   const ob = (target: any).__ob__
+
   // 添加的对象不能是 Vue 实例，或者 Vue 实例的根数据对象
+  // 不能向 Vue 实例或者 $data 添加响应式属性，vmCount 的用处之一，
+  // this.$data 的 ob.vmCount = 1，表示根组件，其它子组件的 vm.vmCount 都是 0
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
@@ -312,7 +315,8 @@ export function set (
 }
 
 /**
- * Delete a property and trigger change if necessary.
+ * 通过 Vue.delete 或者 vm.$delete 删除 target 对象的指定 key
+ * 数组通过 splice 方法实现，对象则通过 delete 运算符删除指定 key，并执行依赖通知
  */
 export function del (
     target: Array<any> | Object,
@@ -324,7 +328,7 @@ export function del (
     warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
 
-  // 如果我们要删除的原对象是数组时
+  // target 为数组时，则通过 splice 方法删除指定下标的元素
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     // 我们会调用vue处理过后的splice方法，以便我们能检测到对应的数据被删除，会触发视图更新
     target.splice(key, 1)

@@ -75,6 +75,10 @@ export function createASTElement (
 
 /**
  * Convert HTML string to AST.
+ * 将 HTML 字符串转换为 AST
+ * @param {*} template HTML 模版
+ * @param {*} options 平台特有的编译选项
+ * @returns root
  */
 export function parse (
   template: string,

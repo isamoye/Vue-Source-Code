@@ -35,10 +35,10 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   // NOTE: these are not considered part of the public API - avoid relying on
   // them unless you are aware of the risk.
   Vue.util = {
-    warn,
-    extend,
-    mergeOptions,
-    defineReactive
+    warn,         //警告日志
+    extend,       //类似选项合并
+    mergeOptions, //合并选项
+    defineReactive  //设置响应式
   }
 
   //1、set
@@ -57,6 +57,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   }
 
   //options---这个里面有不少东西
+  // Vue.options.components/directives/filters
   Vue.options = Object.create(null)
   ASSET_TYPES.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)

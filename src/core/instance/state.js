@@ -464,8 +464,10 @@ export function stateMixin (Vue: Class<Component>) {
   //为vue原型设置$data和$props属性，并设置set和get
   const dataDef = {}
   dataDef.get = function () { return this._data }
+
   const propsDef = {}
   propsDef.get = function () { return this._props }
+
   if (process.env.NODE_ENV !== 'production') {
     dataDef.set = function () {
       warn(
@@ -478,11 +480,13 @@ export function stateMixin (Vue: Class<Component>) {
       warn(`$props is readonly.`, this)
     }
   }
+
+  // 将 _data 属性和 _props 属性挂载到 Vue.prototype 对象上
+  // 这样在程序中就可以通过 this.$data 和 this.$props 来访问 data 和 props 对象了
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
-  // 实例方法---vm.$set
-  // this.$set()是将set函数绑定在Vue原型上
+  // 实例方法---vm.$set this.$set()是将set函数绑定在Vue原型上
   Vue.prototype.$set = set
 
   //实例方法---vm.$delete
@@ -496,14 +500,14 @@ export function stateMixin (Vue: Class<Component>) {
     4、如果设置了 immediate，则立即执行一次 cb
     5、返回 unwatch*/
   Vue.prototype.$watch = function (
-    expOrFn: string | Function, //需要进行监听的key或者方法
-    cb: any,                    //回调函数，当key的属性改变的时候会调用此回调函数
-    options?: Object            //在watcher处理时需要传的配置选项
+    expOrFn: string | Function, // 需要进行监听的key或者方法
+    cb: any,                    // 回调函数，当key的属性改变的时候会调用此回调函数
+    options?: Object            // 在watcher处理时需要传的配置选项
   ): Function {
     const vm: Component = this
 
     // 因为上一步做了兼容性处理，保证传入的的cb为function，
-    // 但是如果存在这种watcher的话则需要进一步处理：
+    // 如果存在这种watcher的话则需要进一步处理：
     //    watch:{
     //     address:{
     //       deep: true,

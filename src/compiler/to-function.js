@@ -21,12 +21,25 @@ function createFunction (code, errors) {
 export function createCompileToFunctionFn (compile: Function): Function {
   const cache = Object.create(null)
 
+  /**
+   * 1、执行编译函数，得到编译结果 -> compiled
+   * 2、处理编译期间产生的 error 和 tip，分别输出到控制台
+   * 3、将编译得到的字符串代码通过 new Function(codeStr) 转换成可执行的函数
+   * 4、缓存编译结果
+   * @param { string } template 字符串模版
+   * @param { CompilerOptions } options 编译选项
+   * @param { Component } vm 组件实例
+   * @return { render, staticRenderFns }
+   */
   return function compileToFunctions (
     template: string,
     options?: CompilerOptions,
     vm?: Component
   ): CompiledFunctionResult {
+    // 传递进来的编译选项
     options = extend({}, options)
+
+    // 日志
     const warn = options.warn || baseWarn
     delete options.warn
 
@@ -48,7 +61,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
       }
     }
 
-    // check cache
+    // 如果有缓存，则跳过编译，直接从缓存中获取上次编译的结果
     const key = options.delimiters
       ? String(options.delimiters) + template
       : template
@@ -56,10 +69,10 @@ export function createCompileToFunctionFn (compile: Function): Function {
       return cache[key]
     }
 
-    // compile
+    // 执行编译函数，得到编译结果
     const compiled = compile(template, options)
 
-    // check compilation errors/tips
+    // 检查编译期间产生的 error 和 tip，分别输出到控制台
     if (process.env.NODE_ENV !== 'production') {
       if (compiled.errors && compiled.errors.length) {
         if (options.outputSourceRange) {
@@ -87,6 +100,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
       }
     }
 
+    // 转换编译得到的字符串代码为函数，通过 new Function(code) 实现
     // turn code into functions
     const res = {}
     const fnGenErrors = []
@@ -95,6 +109,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
       return createFunction(code, fnGenErrors)
     })
 
+    // 处理上面代码转换过程中出现的错误，这一步一般不会报错，除非编译器本身出错了
     // check function generation errors.
     // this should only happen if there is a bug in the compiler itself.
     // mostly for codegen development use
@@ -109,6 +124,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
       }
     }
 
+    // 缓存编译结果
     return (cache[key] = res)
   }
 }

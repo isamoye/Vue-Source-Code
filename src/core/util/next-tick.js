@@ -38,7 +38,7 @@ function flushCallbacks () {
 // or even between bubbling of the same event (#6566).*/
 
 // 这里是选取任务队列，微任务队列(promise) -> MutationObserver -> setImmediate -> setTimeout
-let   timerFunc
+let timerFunc
 if (typeof Promise !== 'undefined' && isNative(Promise)) {
   // 如果浏览器支持Promise
   // 首选 Promise.resolve().then()
