@@ -61,9 +61,12 @@ export function lifecycleMixin (Vue: Class<Component>) {
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
 
     const vm: Component = this
+    // 页面的挂载点，真实的元素
     const prevEl = vm.$el
+    // 页面的挂载点，真实的元素
     const prevVnode = vm._vnode
     const restoreActiveInstance = setActiveInstance(vm)
+    // 新 VNode
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.

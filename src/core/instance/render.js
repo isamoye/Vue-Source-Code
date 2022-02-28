@@ -65,6 +65,7 @@ export function setCurrentRenderingInstance (vm: Component) {
 
 export function renderMixin (Vue: Class<Component>) {
   // install runtime convenience helpers
+
   // 为Vue原型上添加渲染相关的简写的工具函数
   installRenderHelpers(Vue.prototype)
 
